@@ -15,6 +15,8 @@ public class ResponseObject {
     private String eTag;
     private List<Product> products;
 
+    public ResponseObject() {
+    }
 
     public ResponseObject(int totalProducts, int pageNumber, int pageSize, int status, String kind, String eTag, List<Product> products) {
         this.totalProducts = totalProducts;

@@ -3,6 +3,8 @@ package com.askjeffreyliu.walmartlist.endpoint;
 import com.askjeffreyliu.walmartlist.model.ResponseObject;
 
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -17,7 +19,7 @@ import retrofit2.http.Query;
  */
 
 public class GetProductEndPoint extends BaseEndpoint {
-    private static interface GetProductService {
+    private interface GetProductService {
 
         @GET("walmartproducts/{apiKey}/{pageNumber}/{pageSize}")
         Call<ResponseObject> getProduct(
@@ -31,9 +33,18 @@ public class GetProductEndPoint extends BaseEndpoint {
     public GetProductEndPoint(final String apiKey) {
         super(apiKey);
 
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        // set your desired log level
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        // add your other interceptors …
+        // add logging as last interceptor
+        httpClient.addInterceptor(logging);  // <-- this is the important line!
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(httpClient.build())
                 .build();
 
         getProductService = retrofit.create(GetProductService.class);

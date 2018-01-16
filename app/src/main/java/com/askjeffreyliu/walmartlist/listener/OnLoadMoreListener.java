@@ -5,5 +5,5 @@ package com.askjeffreyliu.walmartlist.listener;
  */
 
 public interface OnLoadMoreListener {
-    void onLoadMore(String productId);
+    void onLoadMore();
 }

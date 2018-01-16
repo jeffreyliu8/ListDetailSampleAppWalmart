@@ -15,7 +15,11 @@ import com.askjeffreyliu.walmartlist.model.Product;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by jeff on 1/14/18.
@@ -30,15 +34,15 @@ public class DataAdapter extends RecyclerView.Adapter {
 
     // The minimum amount of items to have below your current scroll position
 // before loading more.
-    private int visibleThreshold = 5;
+    private int visibleThreshold = 1;
     private int lastVisibleItem, totalItemCount;
     private boolean loading;
     private OnLoadMoreListener onLoadMoreListener;
     private RecyclerViewClickListener mListener;
 
 
-    public DataAdapter(List<Product> products, RecyclerView recyclerView, Context context, RecyclerViewClickListener listener) {
-        this.products = products;
+    public DataAdapter(RecyclerView recyclerView, Context context, RecyclerViewClickListener listener) {
+
         this.mContext = context;
         this.mListener = listener;
 
@@ -63,7 +67,7 @@ public class DataAdapter extends RecyclerView.Adapter {
                                 // End has been reached
                                 // Do something
                                 if (onLoadMoreListener != null) {
-//                                    onLoadMoreListener.onLoadMore(imageLikeList.get(imageLikeList.size() - 1).getMediaID());
+                                    onLoadMoreListener.onLoadMore();
                                 }
                                 loading = true;
                             }
@@ -72,9 +76,29 @@ public class DataAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public void addProducts(List<Product> toBeAddedProducts) {
-        products.addAll(toBeAddedProducts);
-        notifyDataSetChanged();
+    public void setProducts(List<Product> completeList) {
+        if (products == null) {
+            products = new ArrayList<>();
+            products.addAll(completeList);
+            products.add(null);
+            notifyDataSetChanged();
+        } else {
+            int progressBarIndex = products.size() - 1;
+
+            // first we remove the last progressbar
+            products.remove(progressBarIndex);
+            notifyItemRemoved(progressBarIndex);
+
+            List<Product> diffList = new ArrayList<>();
+            for (int i = progressBarIndex; i < completeList.size(); i++) {
+                diffList.add(completeList.get(i));
+            }
+
+            products.addAll(diffList);
+            products.add(null);
+            notifyItemRangeInserted(progressBarIndex, diffList.size() + 1);
+        }
+        loading = false;
     }
 
     @Override
@@ -103,19 +127,19 @@ public class DataAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ProductViewHolder) {
+            ProductViewHolder viewHolder = (ProductViewHolder) holder;
             Product product = products.get(position);
-            Picasso.with(mContext).load(product.getProductImage()).into(((ProductViewHolder) holder).imageView);
-            ((ProductViewHolder) holder).textView.setText(product.getProductId());
+            Picasso.with(mContext).load(product.getProductImage()).into(viewHolder.imageView);
+            viewHolder.idTextView.setText(product.getProductId());
+            viewHolder.name.setText(product.getProductName());
+            viewHolder.price.setText(product.getPrice());
         }
-    }
-
-
-    public void setLoaded() {
-        loading = false;
     }
 
     @Override
     public int getItemCount() {
+        if (products == null)
+            return 0;
         return products.size();
     }
 
@@ -126,18 +150,23 @@ public class DataAdapter extends RecyclerView.Adapter {
 
     //
     public static class ProductViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private ImageView imageView;
-        private TextView textView;
+        @BindView(R.id.imageView)
+        ImageView imageView;
+        @BindView(R.id.idTextView)
+        TextView idTextView;
+        @BindView(R.id.name)
+        TextView name;
+        @BindView(R.id.price)
+        TextView price;
+
         private Product product;
         private RecyclerViewClickListener mListener;
 
         public ProductViewHolder(View v, RecyclerViewClickListener listener) {
             super(v);
+            ButterKnife.bind(this, v);
             mListener = listener;
             v.setOnClickListener(this);
-            imageView = v.findViewById(R.id.imageView);
-
-            textView = v.findViewById(R.id.textView);
         }
 
         @Override

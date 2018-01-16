@@ -1,25 +1,30 @@
 package com.askjeffreyliu.walmartlist;
 
 
-import android.media.Image;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+
 import android.os.Bundle;
 
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+
 import android.view.View;
 
 
-import com.askjeffreyliu.walmartlist.endpoint.GetProductEndPoint;
+
 import com.askjeffreyliu.walmartlist.listener.OnLoadMoreListener;
+import com.askjeffreyliu.walmartlist.livedata.ProductsLiveData;
 import com.askjeffreyliu.walmartlist.model.Product;
-import com.askjeffreyliu.walmartlist.model.ResponseObject;
+
+import com.askjeffreyliu.walmartlist.viewmodel.ProductsViewModel;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 
@@ -34,9 +39,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
 
-
+    private ProductsLiveData productsLiveData;
     private DataAdapter mAdapter;
-    private List<Product> products = new ArrayList<>();
+    private List<Product> products;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        loadData();
+        setDataListener();
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -61,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // create an Object for Adapter
-        mAdapter = new DataAdapter(products, mRecyclerView, this, new DataAdapter.RecyclerViewClickListener() {
+        mAdapter = new DataAdapter(mRecyclerView, this, new DataAdapter.RecyclerViewClickListener() {
             @Override
             public void onClick(View view, final int position, Product product) {
 
@@ -73,37 +78,29 @@ public class MainActivity extends AppCompatActivity {
 
         mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
-            public void onLoadMore(String mediaId) {
-
+            public void onLoadMore() {
+                productsLiveData.loadMore(true);
             }
         });
     }
 
-    // load initial data
-    private void loadData() {
-        GetProductEndPoint usersEndpoint = new GetProductEndPoint(Constant.API_KEY);
-        usersEndpoint.getProducts(1, 10).enqueue(new retrofit2.Callback<ResponseObject>() {
+    private void setDataListener() {
+        // Get the ViewModel.
+        ProductsViewModel viewModel = ViewModelProviders.of(this).get(ProductsViewModel.class);
+
+        // Create the observer which updates the UI.
+        final Observer<List<Product>> dataObserver = new Observer<List<Product>>() {
             @Override
-            public void onResponse(retrofit2.Call<ResponseObject> call, retrofit2.Response<ResponseObject> response) {
-                if (response.isSuccessful()) {
-                    Logger.d("load successfully");
-                    ResponseObject responseObject = response.body();
-                    if (responseObject != null) {
-                        products = responseObject.getProducts();
-                        for (int i = 0; i < products.size(); i++) {
-                            Logger.d("product id " + products.get(i).getProductId());
-                        }
-                        mAdapter.addProducts(products);
-                    }
-                } else {
-                    Logger.e(response.toString());
+            public void onChanged(@Nullable final List<Product> newCompleteList) {
+                if (newCompleteList != null && mAdapter != null) {
+                    MainActivity.this.products = newCompleteList;
+                    mAdapter.setProducts(newCompleteList);
                 }
             }
+        };
 
-            @Override
-            public void onFailure(retrofit2.Call<ResponseObject> call, Throwable t) {
-                Logger.e("load recent failed");
-            }
-        });
+        // Observe the LiveData, passing in this activity as the LifecycleOwner and the observer.
+        viewModel.getLiveData().observe(this, dataObserver);
+        productsLiveData = viewModel.getLiveData();
     }
 }
