@@ -1,11 +1,14 @@
 package com.askjeffreyliu.walmartlist.model;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by jeff on 1/14/18.
  */
 
-public class Product {
+public class Product implements Parcelable {
     private String productId;
     private String productName;
     private String shortDescription;
@@ -63,4 +66,47 @@ public class Product {
     public boolean isInStock() {
         return inStock;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.productId);
+        dest.writeString(this.productName);
+        dest.writeString(this.shortDescription);
+        dest.writeString(this.longDescription);
+        dest.writeString(this.price);
+        dest.writeString(this.productImage);
+        dest.writeFloat(this.reviewRating);
+        dest.writeInt(this.reviewCount);
+        dest.writeByte(this.inStock ? (byte) 1 : (byte) 0);
+    }
+
+    protected Product(Parcel in) {
+        this.productId = in.readString();
+        this.productName = in.readString();
+        this.shortDescription = in.readString();
+        this.longDescription = in.readString();
+        this.price = in.readString();
+        this.productImage = in.readString();
+        this.reviewRating = in.readFloat();
+        this.reviewCount = in.readInt();
+        this.inStock = in.readByte() != 0;
+    }
+
+    public static final Creator<Product> CREATOR = new Creator<Product>() {
+        @Override
+        public Product createFromParcel(Parcel source) {
+            return new Product(source);
+        }
+
+        @Override
+        public Product[] newArray(int size) {
+            return new Product[size];
+        }
+    };
 }

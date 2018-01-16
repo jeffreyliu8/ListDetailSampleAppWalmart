@@ -133,6 +133,7 @@ public class DataAdapter extends RecyclerView.Adapter {
             viewHolder.idTextView.setText(product.getProductId());
             viewHolder.name.setText(product.getProductName());
             viewHolder.price.setText(product.getPrice());
+            viewHolder.product = product;
         }
     }
 
@@ -171,8 +172,9 @@ public class DataAdapter extends RecyclerView.Adapter {
 
         @Override
         public void onClick(View view) {
-            Logger.d("clicked");
-            mListener.onClick(view, getAdapterPosition(), product);
+            if (mListener != null) {
+                mListener.onClick(view, imageView, product);
+            }
         }
     }
 
@@ -184,6 +186,6 @@ public class DataAdapter extends RecyclerView.Adapter {
     }
 
     public interface RecyclerViewClickListener {
-        void onClick(View view, int position, Product product);
+        void onClick(View view, ImageView imageView, Product product);
     }
 }

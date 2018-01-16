@@ -13,7 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import android.view.View;
-
+import android.widget.ImageView;
 
 
 import com.askjeffreyliu.walmartlist.listener.OnLoadMoreListener;
@@ -68,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
         // create an Object for Adapter
         mAdapter = new DataAdapter(mRecyclerView, this, new DataAdapter.RecyclerViewClickListener() {
             @Override
-            public void onClick(View view, final int position, Product product) {
-
+            public void onClick(View view, final ImageView imageView, Product product) {
+                DetailActivity.navigate(MainActivity.this, imageView, product);
             }
         });
 
