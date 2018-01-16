@@ -21,10 +21,10 @@ public class ProductsLiveData extends MutableLiveData<List<Product>> {
 
 
     public ProductsLiveData() {
-        loadMore(false);
+        loadMore();
     }
 
-    public void loadMore(boolean removeProgressBar) {
+    public void loadMore() {
         usersEndpoint.getProducts(nextPageToBeFetched, Constant.PAGE_SIZE).enqueue(new retrofit2.Callback<ResponseObject>() {
             @Override
             public void onResponse(retrofit2.Call<ResponseObject> call, retrofit2.Response<ResponseObject> response) {

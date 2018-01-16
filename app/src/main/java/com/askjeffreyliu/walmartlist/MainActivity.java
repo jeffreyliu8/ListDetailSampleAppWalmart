@@ -38,10 +38,8 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
-
-    private ProductsLiveData productsLiveData;
+    private ProductsViewModel viewModel;
     private DataAdapter mAdapter;
-    private List<Product> products;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         Logger.addLogAdapter(new AndroidLogAdapter());
-
 
         ButterKnife.bind(this);
 
@@ -79,28 +76,24 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void onLoadMore() {
-                productsLiveData.loadMore(true);
+                viewModel.getLiveData().loadMore();
             }
         });
     }
 
     private void setDataListener() {
         // Get the ViewModel.
-        ProductsViewModel viewModel = ViewModelProviders.of(this).get(ProductsViewModel.class);
-
-        // Create the observer which updates the UI.
-        final Observer<List<Product>> dataObserver = new Observer<List<Product>>() {
-            @Override
-            public void onChanged(@Nullable final List<Product> newCompleteList) {
-                if (newCompleteList != null && mAdapter != null) {
-                    MainActivity.this.products = newCompleteList;
-                    mAdapter.setProducts(newCompleteList);
-                }
-            }
-        };
+        viewModel = ViewModelProviders.of(this).get(ProductsViewModel.class);
 
         // Observe the LiveData, passing in this activity as the LifecycleOwner and the observer.
-        viewModel.getLiveData().observe(this, dataObserver);
-        productsLiveData = viewModel.getLiveData();
+        viewModel.getLiveData().observe(this, new Observer<List<Product>>() {
+            @Override
+            public void onChanged(@Nullable List<Product> products) {
+                if (products != null && mAdapter != null) {
+                    Logger.d("onchanged");
+                    mAdapter.setProducts(products);
+                }
+            }
+        });
     }
 }
