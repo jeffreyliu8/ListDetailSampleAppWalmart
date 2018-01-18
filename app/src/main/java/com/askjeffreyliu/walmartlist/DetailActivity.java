@@ -7,6 +7,8 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,14 +32,20 @@ public class DetailActivity extends AppCompatActivity {
     TextView name;
     @BindView(R.id.price)
     TextView price;
+    @BindView(R.id.stock)
+    TextView stock;
+    @BindView(R.id.longDesc)
+    TextView longDesc;
 
     public static void navigate(AppCompatActivity activity, View transitionImage, Product product) {
         Intent intent = new Intent(activity, DetailActivity.class);
         intent.putExtra(EXTRA_PRODUCT, product);
         intent.putExtra(EXTRA_IMAGE, product.getProductId());
 
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, transitionImage, EXTRA_IMAGE);
-        ActivityCompat.startActivity(activity, intent, options.toBundle());
+        // this is for image transition animation, but it doesn't work well when you can rotate screen
+//        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, transitionImage, EXTRA_IMAGE);
+//        ActivityCompat.startActivity(activity, intent, options.toBundle());
+        activity.startActivity(intent);
     }
 
     @Override
@@ -56,5 +64,10 @@ public class DetailActivity extends AppCompatActivity {
         idTextView.setText(product.getProductId());
         name.setText(product.getProductName());
         price.setText(product.getPrice());
+        stock.setText(getString(product.isInStock() ? R.string.in_stock : R.string.out_of_stock));
+        if (!TextUtils.isEmpty(product.getShortDescription()))
+            longDesc.setText(Html.fromHtml(product.getShortDescription()));
+        else
+            longDesc.setText("");
     }
 }

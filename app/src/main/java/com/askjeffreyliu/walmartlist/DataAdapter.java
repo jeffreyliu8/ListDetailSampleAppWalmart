@@ -136,7 +136,7 @@ public class DataAdapter extends RecyclerView.Adapter {
             viewHolder.idTextView.setText(product.getProductId());
             viewHolder.name.setText(product.getProductName());
             viewHolder.price.setText(product.getPrice());
-            viewHolder.stock.setText(product.isInStock() ? "In Stock" : "Out of Stock");
+            viewHolder.stock.setText(mContext.getString(product.isInStock() ? R.string.in_stock : R.string.out_of_stock));
             if (!TextUtils.isEmpty(product.getShortDescription()))
                 viewHolder.shortDesc.setText(Html.fromHtml(product.getShortDescription()));
             else
