@@ -3,16 +3,18 @@ package com.askjeffreyliu.walmartlist;
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+
 import android.widget.TextView;
 
 import com.askjeffreyliu.walmartlist.listener.OnLoadMoreListener;
 import com.askjeffreyliu.walmartlist.model.Product;
-import com.orhanobut.logger.Logger;
+
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -129,11 +131,16 @@ public class DataAdapter extends RecyclerView.Adapter {
         if (holder instanceof ProductViewHolder) {
             ProductViewHolder viewHolder = (ProductViewHolder) holder;
             Product product = products.get(position);
+            viewHolder.product = product;
             Picasso.with(mContext).load(product.getProductImage()).into(viewHolder.imageView);
             viewHolder.idTextView.setText(product.getProductId());
             viewHolder.name.setText(product.getProductName());
             viewHolder.price.setText(product.getPrice());
-            viewHolder.product = product;
+            viewHolder.stock.setText(product.isInStock() ? "In Stock" : "Out of Stock");
+            if (!TextUtils.isEmpty(product.getShortDescription()))
+                viewHolder.shortDesc.setText(Html.fromHtml(product.getShortDescription()));
+            else
+                viewHolder.shortDesc.setText("");
         }
     }
 
@@ -159,6 +166,10 @@ public class DataAdapter extends RecyclerView.Adapter {
         TextView name;
         @BindView(R.id.price)
         TextView price;
+        @BindView(R.id.stock)
+        TextView stock;
+        @BindView(R.id.shortDesc)
+        TextView shortDesc;
 
         private Product product;
         private RecyclerViewClickListener mListener;
