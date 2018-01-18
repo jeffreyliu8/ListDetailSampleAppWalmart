@@ -12,14 +12,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
 
 import com.askjeffreyliu.walmartlist.listener.OnLoadMoreListener;
-import com.askjeffreyliu.walmartlist.livedata.ProductsLiveData;
 import com.askjeffreyliu.walmartlist.model.Product;
-
 import com.askjeffreyliu.walmartlist.viewmodel.ProductsViewModel;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
@@ -76,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void onLoadMore() {
-                viewModel.getLiveData().loadMore();
+                viewModel.loadPage();
             }
         });
     }
@@ -90,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(@Nullable List<Product> products) {
                 if (products != null && mAdapter != null) {
-                    Logger.d("onchanged");
+                    Log.d("jeff", "products size " + products.size());
                     mAdapter.setProducts(products);
                 }
             }
